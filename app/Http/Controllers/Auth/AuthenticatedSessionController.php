@@ -4,49 +4,61 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
-    public function create(): Response
-    {
-        return Inertia::render('Auth/Login', [
-            'canResetPassword' => Route::has('password.request'),
-            'status' => session('status'),
-        ]);
+  /**
+   * Display the login view.
+   */
+  public function create(): Response
+  {
+    return Inertia::render('Auth/Login', [
+      'notification' => session()->pull('notification'),
+    ]);
+  }
+
+  /**
+   * Handle an incoming authentication request.
+   */
+  public function store(LoginRequest $request): RedirectResponse
+  {
+    try {
+      $request->authenticate();
+
+      $request->session()->regenerate();
+
+      return redirect()->intended('dashboard')->with('notification', [
+        'status' => 'success',
+        'message' => 'Berhasil login.',
+      ]);
+    } catch (Exception $e) {
+      return back()->with('notification', [
+        'status' => 'error',
+        'message' => 'Gagal login. Silahkan cek email dan password.',
+      ]);
     }
+  }
 
-    /**
-     * Handle an incoming authentication request.
-     */
-    public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+  /**
+   * Destroy an authenticated session.
+   */
+  public function destroy(Request $request): RedirectResponse
+  {
+    Auth::guard('web')->logout();
 
-        $request->session()->regenerate();
+    $request->session()->invalidate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
-    }
+    $request->session()->regenerateToken();
 
-    /**
-     * Destroy an authenticated session.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
-        return redirect('/');
-    }
+    return redirect('/')->with('notification', [
+      'status' => 'success',
+      'message' => 'Berhasil logout.',
+    ]);
+  }
 }

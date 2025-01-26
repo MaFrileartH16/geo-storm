@@ -1,24 +1,66 @@
 import { AppLayout } from '@/Layouts/AppLayout.jsx';
 import { Link, router } from '@inertiajs/react'; // Import router dari Inertia
-import { BarChart } from '@mantine/charts';
 import {
   ActionIcon,
   Avatar,
   Box,
-  Card,
   Divider,
   Drawer,
   Flex,
   Group,
   Menu,
   NavLink,
+  Table,
   Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLogout, IconMenu } from '@tabler/icons-react'; // Import ikon yang diperlukan
+import { IconLogout, IconMenu, IconTrash } from '@tabler/icons-react'; // Import ikon yang diperlukan
 
-const Dashboard = (props) => {
-  console.log(props);
+const Index = (props) => {
+  const UsersTable = ({ users }) => {
+    // Fungsi untuk handle hapus pengguna
+    const handleDeleteUser = (userId) => {
+      if (confirm('Apakah Anda yakin ingin menghapus pengguna ini?')) {
+        router.delete(route('users.destroy', userId)); // Arahkan ke route hapus pengguna
+      }
+    };
+
+    // Jika users tidak ada atau kosong, tampilkan pesan
+    if (!users || users.length === 0) {
+      return <div>Tidak ada data pengguna.</div>;
+    }
+
+    // Map data users ke dalam baris tabel
+    const rows = users.map((user) => (
+      <Table.Tr key={user.id}>
+        <Table.Td>{user.name}</Table.Td>
+        <Table.Td>{user.email}</Table.Td>
+        <Table.Td>
+          <ActionIcon
+            color="red"
+            variant="light"
+            onClick={() => handleDeleteUser(user.id)} // Panggil fungsi hapus saat diklik
+          >
+            <IconTrash size={16} />
+          </ActionIcon>
+        </Table.Td>
+      </Table.Tr>
+    ));
+
+    return (
+      <Table striped highlightOnHover>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Nama</Table.Th>
+            <Table.Th>Email</Table.Th>
+            <Table.Th>Aksi</Table.Th> {/* Kolom untuk tombol hapus */}
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>{rows}</Table.Tbody>
+      </Table>
+    );
+  };
+
   // Hook untuk mengontrol Drawer
   const [opened, { open, close }] = useDisclosure(false);
 
@@ -28,7 +70,7 @@ const Dashboard = (props) => {
   };
 
   return (
-    <AppLayout title="Dasbor">
+    <AppLayout title="Daftar Pengguna">
       <Flex mih="100vh" direction="column">
         {/* Tombol untuk membuka Drawer */}
         <Group justify="space-between" p={16}>
@@ -126,41 +168,14 @@ const Dashboard = (props) => {
 
         {/* Konten utama */}
         <Box p={16}>
-          {props.auth.user.role === 'Admin' && (
-            <Card shadow="sm" padding="lg" radius="md" mb={16}>
-              <Title order={3} mb={16}>
-                Jumlah Users per Bulan
-              </Title>
-              <BarChart
-                h={300}
-                data={props.userData}
-                dataKey="month"
-                series={[{ name: 'Pengguna', color: 'violet.6' }]}
-                tickLine="xy"
-                gridAxis="xy"
-              />
-            </Card>
-          )}
-
-          {props.auth.user.role === 'Borrower' && (
-            <Card shadow="sm" padding="lg" radius="md" mb={16}>
-              <Title order={3} mb={16}>
-                Jumlah Meminjam per Bulan
-              </Title>
-              <BarChart
-                h={300}
-                data={props.rentalData}
-                dataKey="month"
-                series={[{ name: 'Meminjam', color: 'blue.6' }]}
-                tickLine="xy"
-                gridAxis="xy"
-              />
-            </Card>
-          )}
+          <Title order={2} mb={16}>
+            Daftar Pengguna
+          </Title>
+          <UsersTable users={props.users} />
         </Box>
       </Flex>
     </AppLayout>
   );
 };
 
-export default Dashboard;
+export default Index;

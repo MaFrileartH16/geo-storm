@@ -1,120 +1,112 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { AppLayout } from '@/Layouts/AppLayout.jsx';
+import { router } from '@inertiajs/core';
+import { useForm } from '@inertiajs/react';
+import {
+  Anchor,
+  Box,
+  Button,
+  Center,
+  PasswordInput,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core';
 
-export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
+const Register = (props) => {
+  // Inertia.js useForm hook untuk mengelola form
+  const { data, setData, post, processing, errors, reset } = useForm({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+  });
+
+  // Fungsi untuk mengirim data form
+  const submit = (e) => {
+    e.preventDefault();
+    post(route('register'), {
+      onFinish: () => reset('password', 'password_confirmation'), // Reset password field setelah submit
     });
+  };
 
-    const submit = (e) => {
-        e.preventDefault();
+  return (
+    <AppLayout title="Daftar Akun" notification={props.notification}>
+      <Center mih="100vh">
+        <Box
+          w={400}
+          p="md"
+          style={{ border: '1px solid #ddd', borderRadius: '8px' }}
+        >
+          <Title align="center" mb="md">
+            Daftar Akun
+          </Title>
 
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
-    };
+          {/* Form Register */}
+          <form onSubmit={submit}>
+            {/* Input Nama */}
+            <TextInput
+              label="Nama"
+              placeholder="Masukkan nama Anda"
+              value={data.name}
+              onChange={(e) => setData('name', e.target.value)}
+              error={errors.name} // Tampilkan pesan error jika ada
+              required
+              mb="md"
+            />
 
-    return (
-        <GuestLayout>
-            <Head title="Register" />
+            {/* Input Email */}
+            <TextInput
+              label="Email"
+              placeholder="Masukkan email Anda"
+              value={data.email}
+              onChange={(e) => setData('email', e.target.value)}
+              error={errors.email} // Tampilkan pesan error jika ada
+              required
+              mb="md"
+            />
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
+            {/* Input Password */}
+            <PasswordInput
+              label="Password"
+              placeholder="Masukkan password Anda"
+              value={data.password}
+              onChange={(e) => setData('password', e.target.value)}
+              error={errors.password} // Tampilkan pesan error jika ada
+              required
+              mb="md"
+            />
 
-                    <TextInput
-                        id="name"
-                        name="name"
-                        value={data.name}
-                        className="mt-1 block w-full"
-                        autoComplete="name"
-                        isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
-                        required
-                    />
+            {/* Input Konfirmasi Password */}
+            <PasswordInput
+              label="Konfirmasi Password"
+              placeholder="Masukkan ulang password Anda"
+              value={data.password_confirmation}
+              onChange={(e) => setData('password_confirmation', e.target.value)}
+              error={errors.password_confirmation} // Tampilkan pesan error jika ada
+              required
+              mb="md"
+            />
 
-                    <InputError message={errors.name} className="mt-2" />
-                </div>
+            {/* Tombol Submit */}
+            <Button type="submit" fullWidth loading={processing}>
+              Daftar
+            </Button>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
+            {/* Tautan ke Halaman Login */}
+            <Text align="center" mt="md">
+              Sudah punya akun?{' '}
+              <Anchor
+                onClick={() => router.get(route('login'))}
+                style={{ color: '#228be6', textDecoration: 'none' }}
+              >
+                Masuk di sini
+              </Anchor>
+            </Text>
+          </form>
+        </Box>
+      </Center>
+    </AppLayout>
+  );
+};
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        required
-                    />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Already registered?
-                    </Link>
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
-    );
-}
+export default Register;

@@ -1,24 +1,90 @@
 import { AppLayout } from '@/Layouts/AppLayout.jsx';
 import { Link, router } from '@inertiajs/react'; // Import router dari Inertia
-import { BarChart } from '@mantine/charts';
 import {
   ActionIcon,
   Avatar,
   Box,
-  Card,
   Divider,
   Drawer,
   Flex,
   Group,
   Menu,
   NavLink,
+  Table,
   Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLogout, IconMenu } from '@tabler/icons-react'; // Import ikon yang diperlukan
+import {
+  IconCheck,
+  IconLogout,
+  IconMenu,
+  IconTrash,
+} from '@tabler/icons-react'; // Import ikon yang diperlukan
 
-const Dashboard = (props) => {
-  console.log(props);
+const Index = (props) => {
+  const RentalsTable = ({ rentals }) => {
+    // Fungsi untuk handle hapus rental
+    const handleDeleteRental = (rentalId) => {
+      if (confirm('Apakah Anda yakin ingin menghapus rental ini?')) {
+        router.delete(route('rentals.destroy', rentalId)); // Arahkan ke route hapus rental
+      }
+    };
+
+    // Fungsi untuk handle kembalikan rental
+    const handleReturnRental = (rentalId) => {
+      if (confirm('Apakah Anda yakin ingin mengembalikan rental ini?')) {
+        router.post(route('rentals.return', rentalId)); // Arahkan ke route kembalikan rental
+      }
+    };
+
+    // Jika rentals tidak ada atau kosong, tampilkan pesan
+    if (!rentals || rentals.length === 0) {
+      return <div>Tidak ada data rental.</div>;
+    }
+
+    // Map data rentals ke dalam baris tabel
+    const rows = rentals.map((rental) => (
+      <Table.Tr key={rental.id}>
+        <Table.Td>{rental.user.name}</Table.Td>
+        <Table.Td>{rental.musical_instrument.name}</Table.Td>
+        <Table.Td>
+          {/* Tombol Kembalikan */}
+          {rental.is_rented && (
+            <ActionIcon
+              color="green"
+              variant="light"
+              onClick={() => handleReturnRental(rental.id)} // Panggil fungsi kembalikan saat diklik
+              style={{ marginRight: '8px' }}
+            >
+              <IconCheck size={16} /> {/* Ganti dengan ikon yang sesuai */}
+            </ActionIcon>
+          )}
+          {/* Tombol Hapus */}
+          <ActionIcon
+            color="red"
+            variant="light"
+            onClick={() => handleDeleteRental(rental.id)} // Panggil fungsi hapus saat diklik
+          >
+            <IconTrash size={16} />
+          </ActionIcon>
+        </Table.Td>
+      </Table.Tr>
+    ));
+
+    return (
+      <Table striped highlightOnHover>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Nama Pengguna</Table.Th>
+            <Table.Th>Alat Musik</Table.Th>
+            <Table.Th>Aksi</Table.Th> {/* Kolom untuk tombol aksi */}
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>{rows}</Table.Tbody>
+      </Table>
+    );
+  };
+
   // Hook untuk mengontrol Drawer
   const [opened, { open, close }] = useDisclosure(false);
 
@@ -28,7 +94,7 @@ const Dashboard = (props) => {
   };
 
   return (
-    <AppLayout title="Dasbor">
+    <AppLayout title="Daftar Rental">
       <Flex mih="100vh" direction="column">
         {/* Tombol untuk membuka Drawer */}
         <Group justify="space-between" p={16}>
@@ -126,41 +192,14 @@ const Dashboard = (props) => {
 
         {/* Konten utama */}
         <Box p={16}>
-          {props.auth.user.role === 'Admin' && (
-            <Card shadow="sm" padding="lg" radius="md" mb={16}>
-              <Title order={3} mb={16}>
-                Jumlah Users per Bulan
-              </Title>
-              <BarChart
-                h={300}
-                data={props.userData}
-                dataKey="month"
-                series={[{ name: 'Pengguna', color: 'violet.6' }]}
-                tickLine="xy"
-                gridAxis="xy"
-              />
-            </Card>
-          )}
-
-          {props.auth.user.role === 'Borrower' && (
-            <Card shadow="sm" padding="lg" radius="md" mb={16}>
-              <Title order={3} mb={16}>
-                Jumlah Meminjam per Bulan
-              </Title>
-              <BarChart
-                h={300}
-                data={props.rentalData}
-                dataKey="month"
-                series={[{ name: 'Meminjam', color: 'blue.6' }]}
-                tickLine="xy"
-                gridAxis="xy"
-              />
-            </Card>
-          )}
+          <Title order={2} mb={16}>
+            Daftar Rental
+          </Title>
+          <RentalsTable rentals={props.rentals} />
         </Box>
       </Flex>
     </AppLayout>
   );
 };
 
-export default Dashboard;
+export default Index;

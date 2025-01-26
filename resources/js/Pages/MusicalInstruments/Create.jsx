@@ -1,25 +1,36 @@
 import { AppLayout } from '@/Layouts/AppLayout.jsx';
-import { Link, router } from '@inertiajs/react'; // Import router dari Inertia
-import { BarChart } from '@mantine/charts';
+import { Link, router, useForm } from '@inertiajs/react'; // Import useForm dari Inertia
 import {
   ActionIcon,
   Avatar,
   Box,
-  Card,
+  Button,
   Divider,
   Drawer,
   Flex,
   Group,
   Menu,
   NavLink,
+  Select,
+  TextInput,
   Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLogout, IconMenu } from '@tabler/icons-react'; // Import ikon yang diperlukan
+import { IconLogout, IconMenu } from '@tabler/icons-react';
 
-const Dashboard = (props) => {
-  console.log(props);
-  // Hook untuk mengontrol Drawer
+const Create = (props) => {
+  // Inisialisasi form dengan useForm dari Inertia
+  const { data, setData, post, processing, errors } = useForm({
+    name: '',
+    status: 'available',
+  });
+
+  // Fungsi untuk handle submit form
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    post(route('musical-instruments.store')); // Kirim data ke endpoint store
+  };
+
   const [opened, { open, close }] = useDisclosure(false);
 
   // Fungsi untuk handle logout
@@ -28,7 +39,7 @@ const Dashboard = (props) => {
   };
 
   return (
-    <AppLayout title="Dasbor">
+    <AppLayout title="Tambah Alat Musik">
       <Flex mih="100vh" direction="column">
         {/* Tombol untuk membuka Drawer */}
         <Group justify="space-between" p={16}>
@@ -124,43 +135,54 @@ const Dashboard = (props) => {
           />
         </Drawer>
 
-        {/* Konten utama */}
         <Box p={16}>
-          {props.auth.user.role === 'Admin' && (
-            <Card shadow="sm" padding="lg" radius="md" mb={16}>
-              <Title order={3} mb={16}>
-                Jumlah Users per Bulan
-              </Title>
-              <BarChart
-                h={300}
-                data={props.userData}
-                dataKey="month"
-                series={[{ name: 'Pengguna', color: 'violet.6' }]}
-                tickLine="xy"
-                gridAxis="xy"
-              />
-            </Card>
-          )}
+          <Title order={2} mb={16}>
+            Tambah Alat Musik
+          </Title>
+          <form onSubmit={handleSubmit}>
+            {/* Input Nama Alat Musik */}
+            <TextInput
+              label="Nama Alat Musik"
+              placeholder="Masukkan nama alat musik"
+              value={data.name}
+              onChange={(e) => setData('name', e.target.value)}
+              error={errors.name} // Tampilkan pesan error jika ada
+              mb={16}
+            />
 
-          {props.auth.user.role === 'Borrower' && (
-            <Card shadow="sm" padding="lg" radius="md" mb={16}>
-              <Title order={3} mb={16}>
-                Jumlah Meminjam per Bulan
-              </Title>
-              <BarChart
-                h={300}
-                data={props.rentalData}
-                dataKey="month"
-                series={[{ name: 'Meminjam', color: 'blue.6' }]}
-                tickLine="xy"
-                gridAxis="xy"
-              />
-            </Card>
-          )}
+            {/* Input Status */}
+            <Select
+              label="Status"
+              placeholder="Pilih status alat musik"
+              value={data.status}
+              onChange={(value) => setData('status', value)}
+              data={[
+                { value: 'available', label: 'Available' },
+                { value: 'unavailable', label: 'Unavailable' },
+              ]}
+              error={errors.status} // Tampilkan pesan error jika ada
+              mb={16}
+            />
+
+            {/* Tombol Submit dan Batal */}
+            <Group>
+              <Button type="submit" color="blue" loading={processing}>
+                Simpan
+              </Button>
+              <Button
+                component={Link}
+                href={route('musical-instruments.index')}
+                variant="outline"
+                color="gray"
+              >
+                Batal
+              </Button>
+            </Group>
+          </form>
         </Box>
       </Flex>
     </AppLayout>
   );
 };
 
-export default Dashboard;
+export default Create;
