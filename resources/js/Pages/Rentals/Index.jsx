@@ -43,8 +43,9 @@ const Index = (props) => {
     }
 
     // Map data rentals ke dalam baris tabel
-    const rows = rentals.map((rental) => (
+    const rows = rentals.map((rental, index) => (
       <Table.Tr key={rental.id}>
+        <Table.Td>{index + 1}</Table.Td> {/* Nomor urut dimulai dari 1 */}
         <Table.Td>{rental.user.name}</Table.Td>
         <Table.Td>{rental.musical_instrument.name}</Table.Td>
         <Table.Td>
@@ -75,6 +76,7 @@ const Index = (props) => {
       <Table striped highlightOnHover>
         <Table.Thead>
           <Table.Tr>
+            <Table.Th>No</Table.Th> {/* Kolom untuk nomor urut */}
             <Table.Th>Nama Pengguna</Table.Th>
             <Table.Th>Alat Musik</Table.Th>
             <Table.Th>Aksi</Table.Th> {/* Kolom untuk tombol aksi */}

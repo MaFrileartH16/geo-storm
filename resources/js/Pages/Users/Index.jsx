@@ -31,8 +31,9 @@ const Index = (props) => {
     }
 
     // Map data users ke dalam baris tabel
-    const rows = users.map((user) => (
+    const rows = users.map((user, index) => (
       <Table.Tr key={user.id}>
+        <Table.Td>{index + 1}</Table.Td> {/* Nomor urut dimulai dari 1 */}
         <Table.Td>{user.name}</Table.Td>
         <Table.Td>{user.email}</Table.Td>
         <Table.Td>
@@ -51,6 +52,7 @@ const Index = (props) => {
       <Table striped highlightOnHover>
         <Table.Thead>
           <Table.Tr>
+            <Table.Th>No</Table.Th> {/* Kolom untuk nomor urut */}
             <Table.Th>Nama</Table.Th>
             <Table.Th>Email</Table.Th>
             <Table.Th>Aksi</Table.Th> {/* Kolom untuk tombol hapus */}

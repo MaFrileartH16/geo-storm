@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
     $userData = [];
     if (auth()->user()->role === 'Admin') {
       $userData = User::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        ->where('role', '!=', 'Admin') // Exclude Admin dari perhitungan
         ->whereYear('created_at', Carbon::now()->year)
         ->groupBy('month')
         ->orderBy('month')
